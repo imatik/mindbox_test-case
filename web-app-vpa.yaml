@@ -1,0 +1,24 @@
+# VPA для автоматической настройки ресурсов
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: web-app-vpa
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: web-app-dp
+  updatePolicy:
+    # можно выключить Initial, который экономит нам ресурсы только через время,
+    # в замену можно отключить "Off" и просто ручками 
+    # вызывать $ kubectl describe vpa web-app-vpa и самому корректировать ресурсы 
+  updateMode: "Initial"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: app
+      minAllowed:
+        cpu: "50m"
+        memory: "64Mi"
+      maxAllowed:
+        cpu: "300m"
+        memory: "256Mi"

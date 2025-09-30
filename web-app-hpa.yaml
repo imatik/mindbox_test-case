@@ -1,0 +1,31 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-app-dp
+  minReplicas: 3  # по одному поду на зону для отказоустойчивости
+  maxReplicas: 6  # 4 на пик + 2 резерв
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70  # Целевой уровень, подсвечивающий HPA о необходимости увелечинии подов
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5 минуты - осторожное уменьшение
+      policies:
+      - type: Pods
+        value: 1 
+        periodSeconds: 60 # Период запроса метрик для возможного масштабирования
+    scaleUp:
+      stabilizationWindowSeconds: 15 
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 15
